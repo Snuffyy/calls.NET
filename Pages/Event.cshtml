@@ -1,0 +1,70 @@
+﻿@page
+@model EventModel
+@{
+    ViewData["Title"] = "Events";
+}
+<h1>@ViewData["Title"]</h1>
+
+<form>
+    <select onchange='this.form.submit()' type="submit" asp-for="PageSize" asp-items="new SelectList(new int[]{5, 10, 25})">
+            <option value="">Events per page</option>
+    </select>
+<noscript><input type="submit" value="Submit"></noscript>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Call.Caller)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Call.Receiver)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Timestamp)
+            </th>
+            <!-- <th></th> -->
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Events) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Call.Caller)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Call.Receiver)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Timestamp)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+@{
+    var prevDisabled = !Model.Events.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.Events.HasNextPage ? "disabled" : "";
+}
+
+<a asp-page="./Event"
+    asp-route-pageSize="@Model.PageSize"
+   asp-route-pageIndex="@(Model.Events.PageIndex - 1)"
+   class="btn btn-primary @prevDisabled">
+    Previous
+</a>
+<a asp-page="./Event"
+asp-route-pageSize="@Model.PageSize"
+   asp-route-pageIndex="@(Model.Events.PageIndex + 1)"
+   class="btn btn-primary @nextDisabled">
+    Next
+</a>
+
