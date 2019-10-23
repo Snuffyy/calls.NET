@@ -26,12 +26,50 @@ namespace ite4160.Pages
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        public async Task OnGetAsync(int? pageIndex, int? pageSize)
+        public string CurrentSort { get; set; }
+        public string CallerSort { get; set; }
+        public string ReceiverSort { get; set; }
+
+        public async Task OnGetAsync(int? pageIndex, int? pageSize, string sort)
         {
             PageSize = pageSize ?? PageSize;
+            CallerSort = ReverseCallerSortQueryParam(sort);
+            ReceiverSort = ReverseReceiverSortQueryParam(sort);
+            CurrentSort = sort;
 
-            var events = _context.Events.Include(e => e.Call);
+            var events = FindEvents(sort);
             Events = await PaginatedList<Event>.CreateAsync(events, pageIndex ?? 1, PageSize);
+        }
+
+        private IQueryable<Event> FindEvents(string sort)
+        {
+            switch (sort)
+            {
+                case "caller_desc":
+                    return _context.Events.Include(e => e.Call).OrderByDescending(e => e.Call.Caller);
+                case "receiver_desc":
+                    return _context.Events.Include(e => e.Call).OrderByDescending(e => e.Call.Receiver);
+                case "receiver_asc":
+                    return _context.Events.Include(e => e.Call).OrderBy(e => e.Call.Receiver);
+                case "caller_asc":
+                    return _context.Events.Include(e => e.Call).OrderBy(e => e.Call.Caller);
+                default:
+                    return _context.Events.Include(e => e.Call).OrderBy(e => e.Timestamp);
+            }
+        }
+
+        private string ReverseCallerSortQueryParam(string param)
+        {
+            if (string.IsNullOrEmpty(param)) return "caller_asc";
+            else if (param.Equals("caller_asc")) return "caller_desc";
+            else return "caller_asc";
+        }
+
+        private string ReverseReceiverSortQueryParam(string param)
+        {
+            if (string.IsNullOrEmpty(param)) return "receiver_asc";
+            else if (param.Equals("receiver_asc")) return "receiver_desc";
+            else return "receiver_asc";
         }
     }
 }

@@ -16,13 +16,17 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Events[0].Call.Caller)
+                <a asp-page="./Event" asp-route-sort="@Model.CallerSort">
+                    @Html.DisplayNameFor(model => model.Events[0].Call.Caller)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Events[0].Type)
             </th>
             <th>
+                <a asp-page="./Event" asp-route-sort="@Model.ReceiverSort">
                 @Html.DisplayNameFor(model => model.Events[0].Call.Receiver)
+                </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Events[0].Timestamp)
@@ -57,14 +61,16 @@
 
 <a asp-page="./Event"
     asp-route-pageSize="@Model.PageSize"
-   asp-route-pageIndex="@(Model.Events.PageIndex - 1)"
-   class="btn btn-primary @prevDisabled">
+    asp-route-pageIndex="@(Model.Events.PageIndex - 1)"
+    asp-route-sort="@Model.CurrentSort"
+    class="btn btn-primary @prevDisabled">
     Previous
 </a>
 <a asp-page="./Event"
-asp-route-pageSize="@Model.PageSize"
-   asp-route-pageIndex="@(Model.Events.PageIndex + 1)"
-   class="btn btn-primary @nextDisabled">
+    asp-route-pageSize="@Model.PageSize"
+    asp-route-pageIndex="@(Model.Events.PageIndex + 1)"
+    asp-route-sort="@Model.CurrentSort"
+    class="btn btn-primary @nextDisabled">
     Next
 </a>
 
