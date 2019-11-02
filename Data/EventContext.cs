@@ -9,5 +9,12 @@ namespace ite4160.Data
 
         public DbSet<Event> Events { get; set; }
         public DbSet<Call> Calls { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Call>().Property(m => m.Receiver).IsRequired(false);
+            base.OnModelCreating(modelBuilder);
+        }
     }
+
 }

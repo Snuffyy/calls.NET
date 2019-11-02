@@ -1,4 +1,5 @@
 ﻿@page
+@using ite4160.Models
 @model EventModel
 @{
     ViewData["Title"] = "Events";
@@ -9,29 +10,70 @@
     <select onchange='this.form.submit()' type="submit" asp-for="PageSize" asp-items="new SelectList(new int[]{5, 10, 25})">
             <option value="">Events per page</option>
     </select>
+    @Html.Hidden("sort", @Model.CallerSort)
+    @Html.Hidden("filter", @Model.CurrentFilter)
+    @Html.Hidden("pageSize", @Model.PageSize)
 <noscript><input type="submit" value="Submit"></noscript>
+</form>
+
+<form asp-page="./Event" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find:
+            <input type="text" name="filter" value="@Model.CurrentFilter" />
+                @Html.Hidden("sort", @Model.CallerSort)
+                @Html.Hidden("pageSize", @Model.PageSize)
+            <input type="submit" value="Find" class="btn btn-primary" />
+            <a asp-page="./Event" asp-route-pageSize="@Model.PageSize" class="btn btn-secondary">All Events</a>
+        </p>
+    </div>
+</form>
+
+
+<form method="get">
+
+    @{
+        var pickUp = @Model.EventTypes.Contains(EventType.PickUp);
+    }
+
+    <input onchange='this.form.submit()' checked="@pickUp" name="eventType" value="pickup" type="checkbox" id="pickup" />
+    <label for="pickup">Pick-up</label>
+
+    <noscript><input type="submit" value="Submit"></noscript>
 </form>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                <a asp-page="./Event" asp-route-sort="@Model.CallerSort">
+                @{var callerSort = @Model.CallerSort == null ? "caller_asc" : @Model.CallerSort;}
+
+                <a  asp-page="./Event"
+                    asp-route-sort="@callerSort"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageIndex="@Model.Events.PageIndex"
+                >
                     @Html.DisplayNameFor(model => model.Events[0].Call.Caller)
                 </a>
+
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Events[0].Type)
             </th>
             <th>
-                <a asp-page="./Event" asp-route-sort="@Model.ReceiverSort">
+                @{var receiverSort = @Model.ReceiverSort == null ? "receiver_asc" : @Model.ReceiverSort;}
+
+                <a asp-page="./Event"
+                    asp-route-sort="@receiverSort"
+                    asp-route-pageSize="@Model.PageSize"
+                    asp-route-pageIndex="@Model.Events.PageIndex"
+                >
                 @Html.DisplayNameFor(model => model.Events[0].Call.Receiver)
                 </a>
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Events[0].Timestamp)
             </th>
-            <!-- <th></th> -->
         </tr>
     </thead>
     <tbody>
@@ -63,6 +105,7 @@
     asp-route-pageSize="@Model.PageSize"
     asp-route-pageIndex="@(Model.Events.PageIndex - 1)"
     asp-route-sort="@Model.CurrentSort"
+    asp-route-filter="@Model.CurrentFilter"
     class="btn btn-primary @prevDisabled">
     Previous
 </a>
@@ -70,6 +113,7 @@
     asp-route-pageSize="@Model.PageSize"
     asp-route-pageIndex="@(Model.Events.PageIndex + 1)"
     asp-route-sort="@Model.CurrentSort"
+    asp-route-filter="@Model.CurrentFilter"
     class="btn btn-primary @nextDisabled">
     Next
 </a>

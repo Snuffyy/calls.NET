@@ -22,11 +22,11 @@ namespace ite4160.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Caller")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Caller")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int?>("Receiver")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Receiver")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");

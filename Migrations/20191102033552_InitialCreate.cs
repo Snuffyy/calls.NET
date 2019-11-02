@@ -13,8 +13,8 @@ namespace ite4160.Migrations
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Caller = table.Column<int>(nullable: false),
-                    Receiver = table.Column<int>(nullable: true),
+                    Caller = table.Column<string>(nullable: true),
+                    Receiver = table.Column<string>(nullable: true),
                     Type = table.Column<int>(nullable: false)
                 },
                 constraints: table =>

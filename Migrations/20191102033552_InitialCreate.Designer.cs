@@ -9,7 +9,7 @@ using ite4160.Data;
 namespace ite4160.Migrations
 {
     [DbContext(typeof(EventContext))]
-    [Migration("20191020165227_InitialCreate")]
+    [Migration("20191102033552_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,11 +24,11 @@ namespace ite4160.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("Caller")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Caller")
+                        .HasColumnType("TEXT");
 
-                    b.Property<int?>("Receiver")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Receiver")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Type")
                         .HasColumnType("INTEGER");

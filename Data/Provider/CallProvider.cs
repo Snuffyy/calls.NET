@@ -14,8 +14,8 @@ namespace ite4160.Data.Provider
         {
             return new Call()
             {
-                Caller = phoneNumberGenerator.Number(type).Value,
-                Receiver = phoneNumberGenerator.Number(type),
+                Caller = phoneNumberGenerator.Number(),
+                Receiver = phoneNumberGenerator.NullableNumber(type),
                 Type = type
             };
         }
@@ -32,12 +32,17 @@ namespace ite4160.Data.Provider
             private Random random = new Random();
             private int[] firstDigits = { 3, 5, 8 };
 
-            public int? Number(CallType type)
+            public string Number()
+            {
+                int firstDigit = firstDigits[random.Next(0, firstDigits.Length)];
+                return Convert.ToInt32($"{firstDigit}{random.Next(10000, 100000)}").ToString();
+            }
+
+            public string NullableNumber(CallType type)
             {
                 if (type == CallType.NonDialled) return null;
 
-                int firstDigit = firstDigits[random.Next(0, firstDigits.Length)];
-                return Convert.ToInt32($"{firstDigit}{random.Next(10000, 100000)}");
+                return Number();
             }
         }
     }
