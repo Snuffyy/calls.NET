@@ -52,7 +52,7 @@ namespace ite4160
         }
 
         public static PaginatedList<T> Create(
-            IEnumerable<T> source, int pageIndex, int pageSize)
+            IQueryable<T> source, int pageIndex, int pageSize)
         {
             var count = source.Count();
             var items = source.Skip(

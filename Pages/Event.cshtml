@@ -2,7 +2,7 @@
 @using ite4160.Models
 @model EventModel
 @{
-    ViewData["Title"] = "Events";
+    ViewData["Title"] = "All Events";
 }
 <h1>@ViewData["Title"]</h1>
 
@@ -32,14 +32,25 @@
 
 <form method="get">
 
-    @{
-        var pickUp = @Model.EventTypes.Contains(EventType.PickUp);
+    @functions{
+        bool HasEventType(EventType type) => @Model.EventTypes.Contains(type);
     }
 
-    <input onchange='this.form.submit()' checked="@pickUp" name="eventType" value="pickup" type="checkbox" id="pickup" />
+    <input id="pickup" value="true" name="pickup" checked="@HasEventType(EventType.PickUp)" type="checkbox" onchange='this.form.submit()'/>
     <label for="pickup">Pick-up</label>
 
-    <noscript><input type="submit" value="Submit"></noscript>
+    <input id="dial" value="true" name="dial" checked="@HasEventType(EventType.Dial)" type="checkbox" onchange='this.form.submit()'/>
+    <label for="dial">Dialling</label>
+
+    <input id="established" value="true" name="established" checked="@HasEventType(EventType.CallEstablished)" type="checkbox" onchange='this.form.submit()'/>
+    <label for="established">Call Established</label>
+
+    <input id="end" value="true" name="end" checked="@HasEventType(EventType.CallEnd)" type="checkbox" onchange='this.form.submit()'/>
+    <label for="end">Call End</label>
+
+    <input id="hangup" value="true" name="hangup" checked="@HasEventType(EventType.HangUp)" type="checkbox" onchange='this.form.submit()'/>
+    <label for="hangup">Hang-up</label>
+
 </form>
 
 <table class="table">
@@ -78,7 +89,7 @@
     </thead>
     <tbody>
 @foreach (var item in Model.Events) {
-        <tr>
+        <tr onclick="location.href = '@(Url.Page("CallDetails", new { id = item.Call.ID }))'">
             <td>
                 @Html.DisplayFor(modelItem => item.Call.Caller)
             </td>

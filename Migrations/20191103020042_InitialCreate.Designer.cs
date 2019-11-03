@@ -9,7 +9,7 @@ using ite4160.Data;
 namespace ite4160.Migrations
 {
     [DbContext(typeof(EventContext))]
-    [Migration("20191102033552_InitialCreate")]
+    [Migration("20191103020042_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

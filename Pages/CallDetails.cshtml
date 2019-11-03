@@ -1,0 +1,51 @@
+@page "{id:int}"
+@using ite4160.Models
+
+@model CallDetailsModel
+@{
+    ViewData["Title"] = "Call Details";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@functions{
+    public string Type(CallType type) => type==CallType.Full ? "Regular call" : "Cancelled call";
+}
+<h3>@Model.Call.Caller#: @Type(@Model.Call.Type)</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Call.Caller)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Type)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Call.Receiver)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Events[0].Timestamp)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Events) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Call.Caller)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Type)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Call.Receiver)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Timestamp)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

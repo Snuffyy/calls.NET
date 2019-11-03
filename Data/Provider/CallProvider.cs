@@ -31,11 +31,17 @@ namespace ite4160.Data.Provider
         {
             private Random random = new Random();
             private int[] firstDigits = { 3, 5, 8 };
+            private IList<string> Existing { get; } = new List<string>();
 
             public string Number()
             {
                 int firstDigit = firstDigits[random.Next(0, firstDigits.Length)];
-                return Convert.ToInt32($"{firstDigit}{random.Next(10000, 100000)}").ToString();
+                var number = random.Next(0, 2) == 0
+                    ? Convert.ToInt32($"{firstDigit}{random.Next(10000, 100000)}").ToString()
+                    : Existing[random.Next(0, Existing.Count)];
+                Existing.Add(number);
+
+                return number;
             }
 
             public string NullableNumber(CallType type)

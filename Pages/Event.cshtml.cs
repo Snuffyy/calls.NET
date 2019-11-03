@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ite4160.Data;
@@ -33,9 +32,19 @@ namespace ite4160.Pages
         public string CallerSort { get; set; }
         public string ReceiverSort { get; set; }
 
-        public ISet<EventType> EventTypes { get; set; } = new HashSet<EventType>();
+        public ISet<EventType> EventTypes { get; } = new HashSet<EventType>();
 
-        public async Task OnGetAsync(int? pageIndex, int? pageSize, string sort, string filter, string eventType)
+        public async Task OnGetAsync(
+            int? pageIndex,
+            int? pageSize,
+            string sort,
+            string filter,
+            bool pickup,
+            bool dial,
+            bool established,
+            bool end,
+            bool hangup
+        )
         {
             PageSize = pageSize ?? PageSize;
             CallerSort = ReverseCallerSortQueryParam(sort);
@@ -43,20 +52,28 @@ namespace ite4160.Pages
             CurrentSort = sort;
             CurrentFilter = filter;
 
-            var events = FindEvents(sort, filter, eventType);
-            //Events = await PaginatedList<Event>.CreateAsync(events, pageIndex ?? 1, PageSize);
-            Events = PaginatedList<Event>.Create(events, pageIndex ?? 1, PageSize);
+            var events = FindEvents(sort, filter, pickup, dial, established, end, hangup);
+
+            Events = await PaginatedList<Event>.CreateAsync(events, pageIndex ?? 1, PageSize);
         }
 
-        private IEnumerable<Event> FindEvents(string sort, string filter, string eventType)
+        private IQueryable<Event> FindEvents(
+            string sort,
+            string filter,
+            bool pickup,
+            bool dial,
+            bool established,
+            bool end,
+            bool hangup
+        )
         {
-            var events = _context.Events;
+            var events = _context.Events.Include(e => e.Call);
+
             var filteredByNumber = FilterEventsByNumber(events, filter);
-            var sorted = SortEvents(filteredByNumber, sort);
-            var filteredByType = FilterEventsByType(sorted, eventType);
+            var filteredByType = FilterEventsByType(filteredByNumber, pickup, dial, established, end, hangup);
+            var sorted = SortEvents(filteredByType, sort);
 
-
-            return filteredByType;
+            return sorted;
         }
 
         private IQueryable<Event> SortEvents(IQueryable<Event> events, string sort)
@@ -64,15 +81,15 @@ namespace ite4160.Pages
             switch (sort)
             {
                 case "caller_desc":
-                    return events.Include(e => e.Call).OrderByDescending(e => e.Call.Caller);
+                    return events.OrderByDescending(e => e.Call.Caller);
                 case "receiver_desc":
-                    return events.Include(e => e.Call).OrderByDescending(e => e.Call.Receiver);
+                    return events.OrderByDescending(e => e.Call.Receiver);
                 case "receiver_asc":
-                    return events.Include(e => e.Call).OrderBy(e => e.Call.Receiver);
+                    return events.OrderBy(e => e.Call.Receiver);
                 case "caller_asc":
-                    return events.Include(e => e.Call).OrderBy(e => e.Call.Caller);
+                    return events.OrderBy(e => e.Call.Caller);
                 default:
-                    return events.Include(e => e.Call).OrderBy(e => e.Timestamp);
+                    return events.OrderBy(e => e.Timestamp);
             }
         }
 
@@ -83,17 +100,34 @@ namespace ite4160.Pages
             return events.Where(e => e.Call.Caller.Contains(filter) || (e.Call.Receiver != null && e.Call.Receiver.Contains(filter)));
         }
 
-        public IEnumerable<Event> FilterEventsByType(IQueryable<Event> events, string eventType)
+        public IQueryable<Event> FilterEventsByType(
+            IQueryable<Event> events,
+            bool pickup,
+            bool dial,
+            bool established,
+            bool end,
+            bool hangup
+        )
         {
-            EventType? type = DecodeEventType(eventType);
+            HandleEventType(EventType.PickUp, pickup);
+            HandleEventType(EventType.Dial, dial);
+            HandleEventType(EventType.CallEstablished, established);
+            HandleEventType(EventType.CallEnd, end);
+            HandleEventType(EventType.HangUp, hangup);
 
-            if (!type.HasValue) return events;
+            return events.Where(e =>
+                (!pickup && !dial && !established && !end && !hangup)
+                || (pickup ? e.Type == EventType.PickUp : false)
+                || (dial ? e.Type == EventType.Dial : false)
+                || (established ? e.Type == EventType.CallEstablished : false)
+                || (end ? e.Type == EventType.CallEnd : false)
+                || (hangup ? e.Type == EventType.HangUp : false));
+        }
 
-            if (!EventTypes.Contains(type.Value)) EventTypes.Add(type.Value);
-
-            return events
-                .AsEnumerable()
-                .Where(e => EventTypes.Contains(e.Type));
+        private void HandleEventType(EventType type, bool val)
+        {
+            if (val) EventTypes.Add(type);
+            else EventTypes.Remove(type);
         }
 
         private EventType? DecodeEventType(string eventType)
@@ -102,7 +136,7 @@ namespace ite4160.Pages
             {
                 case "pickup":
                     return EventType.PickUp;
-                case "dialling":
+                case "dial":
                     return EventType.Dial;
                 case "established":
                     return EventType.CallEstablished;

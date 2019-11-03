@@ -12,7 +12,11 @@ namespace ite4160.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Call>().Property(m => m.Receiver).IsRequired(false);
+            modelBuilder
+            .Entity<Call>()
+            .Property(m => m.Receiver)
+            .IsRequired(false);
+
             base.OnModelCreating(modelBuilder);
         }
     }
