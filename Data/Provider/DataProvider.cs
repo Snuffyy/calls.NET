@@ -55,7 +55,9 @@ namespace ite4160.Data.Provider
 
                 foreach (var call in calls)
                 {
-                    events.AddRange(eventProvider.EventsForCall(call));
+                    var eventsForCall = eventProvider.EventsForCall(call);
+                    events.AddRange(eventsForCall);
+                    call.Events = eventsForCall.ToList();
                 }
 
 

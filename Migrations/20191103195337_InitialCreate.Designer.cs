@@ -9,7 +9,7 @@ using ite4160.Data;
 namespace ite4160.Migrations
 {
     [DbContext(typeof(EventContext))]
-    [Migration("20191103020042_InitialCreate")]
+    [Migration("20191103195337_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -44,7 +44,7 @@ namespace ite4160.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CallID")
+                    b.Property<int>("CallID")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Timestamp")
@@ -63,8 +63,10 @@ namespace ite4160.Migrations
             modelBuilder.Entity("ite4160.Models.Event", b =>
                 {
                     b.HasOne("ite4160.Models.Call", "Call")
-                        .WithMany()
-                        .HasForeignKey("CallID");
+                        .WithMany("Events")
+                        .HasForeignKey("CallID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

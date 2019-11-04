@@ -1,10 +1,25 @@
 ﻿@page
 @using ite4160.Models
+@using System.Collections.Generic
 @model EventModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @{
     ViewData["Title"] = "All Events";
 }
 <h1>@ViewData["Title"]</h1>
+
+<a  class="btn btn-success"
+    asp-page="Event"
+    asp-route-export="true"
+    asp-route-sort="@(Request.Query["sort"])"
+    asp-route-filter="@(Request.Query["filter"])"
+    asp-route-pickup="@(Request.Query["pickup"])"
+    asp-route-dial="@(Request.Query["dial"])"
+    asp-route-established="@(Request.Query["established"])"
+    asp-route-end="@(Request.Query["end"])"
+    asp-route-hangup="@(Request.Query["hangup"])"
+    >Export
+</a>
 
 <form>
     <select onchange='this.form.submit()' type="submit" asp-for="PageSize" asp-items="new SelectList(new int[]{5, 10, 25})">

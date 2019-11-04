@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using Csv;
 using ite4160.Data;
 using ite4160.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +30,7 @@ namespace ite4160.Pages
         [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
+        [BindProperty]
         public string CurrentFilter { get; set; }
 
         public string CurrentSort { get; set; }
@@ -34,7 +39,8 @@ namespace ite4160.Pages
 
         public ISet<EventType> EventTypes { get; } = new HashSet<EventType>();
 
-        public async Task OnGetAsync(
+        public async Task<IActionResult> OnGetAsync(
+            bool export,
             int? pageIndex,
             int? pageSize,
             string sort,
@@ -46,6 +52,20 @@ namespace ite4160.Pages
             bool hangup
         )
         {
+            if (export)
+            {
+                return RedirectToPage("Event", "export", new
+                {
+                    sort,
+                    filter,
+                    pickup,
+                    dial,
+                    established,
+                    end,
+                    hangup
+                });
+            }
+
             PageSize = pageSize ?? PageSize;
             CallerSort = ReverseCallerSortQueryParam(sort);
             ReceiverSort = ReverseReceiverSortQueryParam(sort);
@@ -55,6 +75,70 @@ namespace ite4160.Pages
             var events = FindEvents(sort, filter, pickup, dial, established, end, hangup);
 
             Events = await PaginatedList<Event>.CreateAsync(events, pageIndex ?? 1, PageSize);
+
+            return Page();
+        }
+
+        public async Task<FileResult> OnGetExportAsync(
+            string sort,
+            string filter,
+            bool pickup,
+            bool dial,
+            bool established,
+            bool end,
+            bool hangup
+        )
+        {
+            var events = FindEvents(
+                sort,
+                filter,
+                pickup,
+                dial,
+                established,
+                end,
+                hangup);
+
+            var column = new[] { "Caller", "Event", "Receiver", "Timestamp" };
+            var rows = events
+                    .Select(e => new[]
+                    {
+                        e.Call.Caller,
+                        e.Type.ToString(),
+                        e.Call.Receiver,
+                        e.Timestamp.ToShortDateString()
+                    })
+                    .ToArray();
+
+            var csv = CsvWriter.WriteToText(column, rows, ',');
+
+            var stream = new MemoryStream();
+            var writer = new StreamWriter(stream);
+            writer.Write(csv);
+            writer.Flush();
+            stream.Position = 0;
+
+            return File(stream, "application/octet-stream", "events.csv");
+            // var stream = new MemoryStream();
+            // var writer = new StreamWriter(stream);
+            // var csv = new CsvWriter(writer);
+
+            // var e = events
+
+            //         .Select(e => new
+            //         {
+            //             Caller = e.Call.Caller,
+            //             Event = e.Type,
+            //             Receiver = e.Call.Receiver == null ? "" : e.Call.Receiver,
+            //             Timestamp = e.Timestamp.ToShortDateString()
+            //         })
+            //         .ToList();
+
+            // csv.WriteRecords(e);
+
+            // stream.Flush();
+
+
+            // return File(stream.ToArray(), "application/octet-stream", "events.csv");
         }
 
         private IQueryable<Event> FindEvents(

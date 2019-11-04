@@ -30,7 +30,7 @@ namespace ite4160.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Type = table.Column<int>(nullable: false),
                     Timestamp = table.Column<DateTime>(nullable: false),
-                    CallID = table.Column<int>(nullable: true)
+                    CallID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -40,7 +40,7 @@ namespace ite4160.Migrations
                         column: x => x.CallID,
                         principalTable: "Calls",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

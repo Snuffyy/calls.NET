@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ite4160.Models;
 using System;
-using static ite4160.Models.Call;
 
 namespace ite4160.Data.Provider
 {
@@ -14,8 +13,8 @@ namespace ite4160.Data.Provider
         {
             return new Call()
             {
-                Caller = phoneNumberGenerator.Number(),
-                Receiver = phoneNumberGenerator.NullableNumber(type),
+                Caller = phoneNumberGenerator.Number(type, false, true),
+                Receiver = phoneNumberGenerator.Number(type, true, false),
                 Type = type
             };
         }
@@ -30,25 +29,22 @@ namespace ite4160.Data.Provider
         private class PhoneNumberProvider
         {
             private Random random = new Random();
-            private int[] firstDigits = { 3, 5, 8 };
+            private int[] _numberBase = { 3, 5, 8 };
             private IList<string> Existing { get; } = new List<string>();
 
-            public string Number()
+            public string Number(CallType type, bool isNullable, bool canRepeat)
             {
-                int firstDigit = firstDigits[random.Next(0, firstDigits.Length)];
-                var number = random.Next(0, 2) == 0
-                    ? Convert.ToInt32($"{firstDigit}{random.Next(10000, 100000)}").ToString()
-                    : Existing[random.Next(0, Existing.Count)];
+                int numberBase = _numberBase[random.Next(0, _numberBase.Length)];
+
+                if (type == CallType.NonDialled && isNullable) return null;
+
+                var number = canRepeat && random.Next(0, 3) == 0 && Existing.Count != 0
+                    ? Existing[random.Next(Existing.Count() - 1)]
+                    : Convert.ToInt32($"{numberBase}{random.Next(10000, 100000)}").ToString();
+
                 Existing.Add(number);
 
                 return number;
-            }
-
-            public string NullableNumber(CallType type)
-            {
-                if (type == CallType.NonDialled) return null;
-
-                return Number();
             }
         }
     }

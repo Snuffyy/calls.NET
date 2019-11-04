@@ -42,7 +42,7 @@ namespace ite4160.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("CallID")
+                    b.Property<int>("CallID")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("Timestamp")
@@ -61,8 +61,10 @@ namespace ite4160.Migrations
             modelBuilder.Entity("ite4160.Models.Event", b =>
                 {
                     b.HasOne("ite4160.Models.Call", "Call")
-                        .WithMany()
-                        .HasForeignKey("CallID");
+                        .WithMany("Events")
+                        .HasForeignKey("CallID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -4,3 +4,39 @@
 
 <h3>@Model.Number#: All Calls</h3>
 
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberCalls[0].Timestamp)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberCalls[0].Duration)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberCalls[0].Receiver)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.NumberCalls[0].Type)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var call in Model.NumberCalls) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => call.Timestamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => call.Duration)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => call.Receiver)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => call.Type)
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

@@ -9,6 +9,6 @@ namespace ite4160.Models
         public string Receiver { get; set; }
         public CallType Type { get; set; }
 
-        public ISet<Event> events { get; set; }
+        public ICollection<Event> Events { get; set; }
     }
 }
