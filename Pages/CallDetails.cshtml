@@ -33,13 +33,13 @@
     <tbody>
 @foreach (var item in Model.Events) {
         <tr>
-            <td onclick="location.href = '@(Url.Page("Calls", new { number = item.Call.Caller }))'">
+            <td onclick="location.href = '@(Url.Page("Calls", new { number = item.Call.Caller }))'" class="hover-g">
                 @Html.DisplayFor(modelItem => item.Call.Caller)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Type)
             </td>
-            <td onclick="location.href = '@(Url.Page("Calls", new { number = item.Call.Receiver }))'">
+            <td onclick="location.href = '@(Url.Page("Calls", new { number = item.Call.Receiver }))'" class="hover-g">
                 @Html.DisplayFor(modelItem => item.Call.Receiver)
             </td>
             <td>

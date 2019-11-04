@@ -1,11 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Csv;
+using CsvHelper;
 using ite4160.Data;
 using ite4160.Models;
+using ite4160.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -27,12 +29,12 @@ namespace ite4160.Pages
 
         public PaginatedList<Event> Events { get; set; }
 
-        [BindProperty(SupportsGet = true)]
         public int PageSize { get; set; } = 10;
 
-        [BindProperty]
+        [BindProperty(SupportsGet = true)]
         public string CurrentFilter { get; set; }
 
+        [BindProperty(SupportsGet = true)]
         public string CurrentSort { get; set; }
         public string CallerSort { get; set; }
         public string ReceiverSort { get; set; }
@@ -98,47 +100,26 @@ namespace ite4160.Pages
                 end,
                 hangup);
 
-            var column = new[] { "Caller", "Event", "Receiver", "Timestamp" };
-            var rows = events
-                    .Select(e => new[]
+            using (var stream = new MemoryStream())
+            {
+                using (var writer = new StreamWriter(stream))
+                using (var csv = new CsvWriter(writer))
+                {
+                    var e = await events
+                    .Select(e => new
                     {
-                        e.Call.Caller,
-                        e.Type.ToString(),
-                        e.Call.Receiver,
-                        e.Timestamp.ToShortDateString()
+                        Caller = e.Call.Caller,
+                        Event = e.Type,
+                        Receiver = e.Call.Receiver == null ? "" : e.Call.Receiver,
+                        Timestamp = e.Timestamp.ToString(TimestampFormatter.Format)
                     })
-                    .ToArray();
+                    .ToListAsync();
 
-            var csv = CsvWriter.WriteToText(column, rows, ',');
+                    csv.WriteRecords(e);
+                }
 
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            writer.Write(csv);
-            writer.Flush();
-            stream.Position = 0;
-
-            return File(stream, "application/octet-stream", "events.csv");
-            // var stream = new MemoryStream();
-            // var writer = new StreamWriter(stream);
-            // var csv = new CsvWriter(writer);
-
-            // var e = events
-
-            //         .Select(e => new
-            //         {
-            //             Caller = e.Call.Caller,
-            //             Event = e.Type,
-            //             Receiver = e.Call.Receiver == null ? "" : e.Call.Receiver,
-            //             Timestamp = e.Timestamp.ToShortDateString()
-            //         })
-            //         .ToList();
-
-            // csv.WriteRecords(e);
-
-            // stream.Flush();
-
-
-            // return File(stream.ToArray(), "application/octet-stream", "events.csv");
+                return File(stream.ToArray(), "application/octet-stream", $"all_records_{DateTime.Now.ToString("yyyyMMdd")}");
+            }
         }
 
         private IQueryable<Event> FindEvents(
@@ -181,7 +162,7 @@ namespace ite4160.Pages
         {
             if (filter == null) return events;
 
-            return events.Where(e => e.Call.Caller.Contains(filter) || (e.Call.Receiver != null && e.Call.Receiver.Contains(filter)));
+            return events.Where(e => e.Call.Caller.StartsWith(filter) || (e.Call.Receiver != null && e.Call.Receiver.StartsWith(filter)));
         }
 
         public IQueryable<Event> FilterEventsByType(

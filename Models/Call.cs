@@ -8,7 +8,6 @@ namespace ite4160.Models
         public string Caller { get; set; }
         public string Receiver { get; set; }
         public CallType Type { get; set; }
-
         public ICollection<Event> Events { get; set; }
     }
 }

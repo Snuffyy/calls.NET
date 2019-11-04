@@ -5,7 +5,7 @@ namespace ite4160.Util
 {
     public static class TimestampFormatter
     {
-        private static readonly string Format = "DD/mm/YYYY HH:MM:ss";
+        public static readonly string Format = "dd/MM/yyyy hh:mm:ss";
 
         private static string TimestampToString(DateTime timestamp) => timestamp.ToString(Format);
 

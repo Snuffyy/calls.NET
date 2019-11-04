@@ -6,44 +6,59 @@
 @{
     ViewData["Title"] = "All Events";
 }
+
+@functions{
+    string Param(string name) => Request.Query[name];
+}
+
+@{
+    var pageIndex = Param("pageIndex");
+    var pageSize = Param("pageSize");
+    var sort = Param("sort");
+    var filter = Param("filter");
+    var pickup = Param("pickup");
+    var dial = Param("dial");
+    var established = Param("established");
+    var end = Param("end");
+    var hangup = Param("hangup");
+}
+
 <h1>@ViewData["Title"]</h1>
 
-<a  class="btn btn-success"
-    asp-page="Event"
-    asp-route-export="true"
-    asp-route-sort="@(Request.Query["sort"])"
-    asp-route-filter="@(Request.Query["filter"])"
-    asp-route-pickup="@(Request.Query["pickup"])"
-    asp-route-dial="@(Request.Query["dial"])"
-    asp-route-established="@(Request.Query["established"])"
-    asp-route-end="@(Request.Query["end"])"
-    asp-route-hangup="@(Request.Query["hangup"])"
-    >Export
-</a>
-
-<form>
+<div class="d-inline-block h6">Events per page:</div>
+<form class="d-inline-block">
     <select onchange='this.form.submit()' type="submit" asp-for="PageSize" asp-items="new SelectList(new int[]{5, 10, 25})">
-            <option value="">Events per page</option>
     </select>
-    @Html.Hidden("sort", @Model.CallerSort)
-    @Html.Hidden("filter", @Model.CurrentFilter)
-    @Html.Hidden("pageSize", @Model.PageSize)
+    @Html.Hidden("sort", @sort)
+    @Html.Hidden("filter", @filter)
+
 <noscript><input type="submit" value="Submit"></noscript>
 </form>
 
 <form asp-page="./Event" method="get">
     <div class="form-actions no-color">
         <p>
-            Find:
+            <span class="h6">Find:</span>
             <input type="text" name="filter" value="@Model.CurrentFilter" />
-                @Html.Hidden("sort", @Model.CallerSort)
+                @Html.Hidden("sort", @Model.CurrentSort)
                 @Html.Hidden("pageSize", @Model.PageSize)
             <input type="submit" value="Find" class="btn btn-primary" />
-            <a asp-page="./Event" asp-route-pageSize="@Model.PageSize" class="btn btn-secondary">All Events</a>
+            <a asp-page="./Event" asp-route-pageSize="@pageSize" class="btn btn-secondary">All Events</a>
+            <a  class="btn btn-success"
+                asp-page="Event"
+                asp-route-export="true"
+                asp-route-sort="@sort"
+                asp-route-filter="@filter"
+                asp-route-pickup="@pickup"
+                asp-route-dial="@dial"
+                asp-route-established="@established"
+                asp-route-end="@end"
+                asp-route-hangup="@hangup"
+                >Export
+            </a>
         </p>
     </div>
 </form>
-
 
 <form method="get">
 
@@ -66,6 +81,10 @@
     <input id="hangup" value="true" name="hangup" checked="@HasEventType(EventType.HangUp)" type="checkbox" onchange='this.form.submit()'/>
     <label for="hangup">Hang-up</label>
 
+    @Html.Hidden("pageSize", @Model.PageSize)
+    @Html.Hidden("sort", @Model.CurrentSort)
+    @Html.Hidden("filter", @Model.CurrentFilter)
+
 </form>
 
 <table class="table">
@@ -76,8 +95,9 @@
 
                 <a  asp-page="./Event"
                     asp-route-sort="@callerSort"
-                    asp-route-pageSize="@Model.PageSize"
-                    asp-route-pageIndex="@Model.Events.PageIndex"
+                    asp-route-filter="@Model.CurrentFilter"
+                    asp-route-pageSize="@pageSize"
+                    asp-route-pageIndex="@pageIndex"
                 >
                     @Html.DisplayNameFor(model => model.Events[0].Call.Caller)
                 </a>
@@ -91,8 +111,9 @@
 
                 <a asp-page="./Event"
                     asp-route-sort="@receiverSort"
-                    asp-route-pageSize="@Model.PageSize"
-                    asp-route-pageIndex="@Model.Events.PageIndex"
+                    asp-route-filter="@Model.CurrentFilter"
+                    asp-route-pageSize="@pageSize"
+                    asp-route-pageIndex="@pageIndex"
                 >
                 @Html.DisplayNameFor(model => model.Events[0].Call.Receiver)
                 </a>
@@ -104,7 +125,7 @@
     </thead>
     <tbody>
 @foreach (var item in Model.Events) {
-        <tr onclick="location.href = '@(Url.Page("CallDetails", new { id = item.Call.ID }))'">
+        <tr onclick="location.href = '@(Url.Page("CallDetails", new { id = item.Call.ID }))'" class="hover-g">
             <td>
                 @Html.DisplayFor(modelItem => item.Call.Caller)
             </td>
@@ -128,7 +149,7 @@
 }
 
 <a asp-page="./Event"
-    asp-route-pageSize="@Model.PageSize"
+    asp-route-pageSize="@pageSize"
     asp-route-pageIndex="@(Model.Events.PageIndex - 1)"
     asp-route-sort="@Model.CurrentSort"
     asp-route-filter="@Model.CurrentFilter"
@@ -136,7 +157,7 @@
     Previous
 </a>
 <a asp-page="./Event"
-    asp-route-pageSize="@Model.PageSize"
+    asp-route-pageSize="@pageSize"
     asp-route-pageIndex="@(Model.Events.PageIndex + 1)"
     asp-route-sort="@Model.CurrentSort"
     asp-route-filter="@Model.CurrentFilter"
