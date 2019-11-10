@@ -22,13 +22,17 @@
         </tr>
     </thead>
     <tbody>
+
 @foreach (var call in Model.NumberCalls) {
+        var duration = String.Format("{0,2}", call.Duration.Days * 24 * 60 +
+                                            call.Duration.Hours * 60 +
+                                            call.Duration.Minutes);
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => call.Timestamp)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => call.Duration)
+                @Html.DisplayFor(modelItem => duration)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => call.Receiver)
